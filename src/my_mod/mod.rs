@@ -10,3 +10,6 @@ pub mod rgb;
 pub mod sphere;
 pub mod utils;
 pub mod vec3;
+pub mod time;
+pub mod animated_sphere;
+pub mod animated_hittable;

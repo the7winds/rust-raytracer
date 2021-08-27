@@ -48,6 +48,10 @@ impl HitRecord {
     pub fn material(&self) -> Rc<dyn Material> {
         self.material.clone()
     }
+
+    pub fn t(&self) -> f32 {
+        self.t
+    }
 }
 
 pub struct Accuracy {

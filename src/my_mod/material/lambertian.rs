@@ -1,5 +1,5 @@
-use crate::my_mod::material::{Attenuation, Material, ScatteringResult};
 use crate::my_mod::hittable::HitRecord;
+use crate::my_mod::material::{Attenuation, Material, ScatteringResult};
 use crate::my_mod::ray::Ray;
 use crate::my_mod::utils::random_on_unit_sphere;
 
