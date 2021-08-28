@@ -13,3 +13,5 @@ pub mod vec3;
 pub mod time;
 pub mod animated_sphere;
 pub mod animated_hittable;
+pub mod renderer;
+pub mod resolution;

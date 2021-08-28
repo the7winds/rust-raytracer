@@ -1,28 +1,28 @@
 use std::io;
 
+use crate::my_mod::resolution::Resolution;
 use crate::my_mod::rgb::RGB;
 
 pub struct Image {
-    width: usize,
-    height: usize,
+    resolution: Resolution,
     content: Vec<RGB>,
 }
 
 impl Image {
-    pub fn new(width: usize, height: usize) -> Self {
+    pub fn new(resolution: Resolution) -> Self {
+        let pixels_count = resolution.width * resolution.height;
         Image {
-            width,
-            height,
-            content: vec![RGB::black(); width * height],
+            resolution,
+            content: vec![RGB::black(); pixels_count],
         }
     }
 
     pub fn width(&self) -> usize {
-        self.width
+        self.resolution.width
     }
 
     pub fn height(&self) -> usize {
-        self.height
+        self.resolution.height
     }
 }
 
@@ -31,14 +31,15 @@ impl core::ops::Index<(usize, usize)> for Image {
 
     fn index(&self, index: (usize, usize)) -> &Self::Output {
         let (row, column) = index;
-        return &self.content[row * self.width + column];
+        return &self.content[row * self.width() + column];
     }
 }
 
 impl core::ops::IndexMut<(usize, usize)> for Image {
     fn index_mut(&mut self, index: (usize, usize)) -> &mut Self::Output {
         let (row, column) = index;
-        return &mut self.content[row * self.width + column];
+        let flat_index = row * self.width() + column;
+        return &mut self.content[flat_index];
     }
 }
 
