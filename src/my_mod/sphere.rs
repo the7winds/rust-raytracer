@@ -1,5 +1,3 @@
-use std::rc::Rc;
-
 use crate::my_mod::{ray::Ray, vec3::Vec3};
 use crate::my_mod::hittable::{Accuracy, HitRecord, Hittable};
 use crate::my_mod::material::Material;
@@ -8,11 +6,11 @@ use crate::my_mod::material::Material;
 pub struct Sphere {
     center: Vec3,
     radius: f32,
-    material: Rc<dyn Material>,
+    material: Material,
 }
 
 impl Sphere {
-    pub fn new(center: &Vec3, radius: f32, material: Rc<dyn Material>) -> Sphere {
+    pub fn new(center: &Vec3, radius: f32, material: Material) -> Sphere {
         Sphere {
             center: *center,
             radius,
@@ -68,7 +66,7 @@ impl Hittable for Sphere {
             -outward_normal
         };
 
-        let hit_record = HitRecord::new(point, normal, self.material.clone(), t, front);
+        let hit_record = HitRecord::new(point, normal, &self.material, t, front);
 
         Some(hit_record)
     }

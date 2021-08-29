@@ -1,6 +1,5 @@
 use std::cmp::Ordering::{Greater, Less};
 use std::option::Option;
-use std::rc::Rc;
 use std::vec::Vec;
 
 use crate::my_mod::material::Material;
@@ -8,19 +7,19 @@ use crate::my_mod::ray::Ray;
 use crate::my_mod::vec3::Vec3;
 
 #[derive(Debug, Clone)]
-pub struct HitRecord {
+pub struct HitRecord<'a> {
     point: Vec3,
     normal: Vec3,
-    material: Rc<dyn Material>,
+    material: &'a Material,
     t: f32,
     front: bool,
 }
 
-impl HitRecord {
+impl<'a> HitRecord<'a> {
     pub fn new(
         point: Vec3,
         normal: Vec3,
-        material: Rc<dyn Material>,
+        material: &'a Material,
         t: f32,
         front: bool,
     ) -> HitRecord {
@@ -45,8 +44,8 @@ impl HitRecord {
         self.front
     }
 
-    pub fn material(&self) -> Rc<dyn Material> {
-        self.material.clone()
+    pub fn material(&self) -> &Material {
+        self.material
     }
 
     pub fn t(&self) -> f32 {

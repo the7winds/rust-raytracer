@@ -11,12 +11,12 @@ use crate::my_mod::vec3::Vec3;
 pub struct AnimatedSphere {
     center: Vec3,
     radius: f32,
-    material: Rc<dyn Material>,
+    material: Material,
     translation: Box<dyn Fn(TimePoint) -> Vec3>
 }
 
 impl AnimatedSphere {
-    pub fn new(center: Vec3, radius: f32, material: Rc<dyn Material>, translation: impl 'static + Fn(TimePoint) -> Vec3) -> AnimatedSphere {
+    pub fn new(center: Vec3, radius: f32, material: Material, translation: impl 'static + Fn(TimePoint) -> Vec3) -> AnimatedSphere {
         AnimatedSphere {
             center,
             radius,

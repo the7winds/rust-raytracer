@@ -1,5 +1,4 @@
 use std::error::Error;
-use std::rc::Rc;
 
 use rand::random;
 
@@ -7,10 +6,7 @@ use crate::my_mod::angle::Angle;
 use crate::my_mod::animated_hittable::{AnimatedHittable, AnimatedHittableList};
 use crate::my_mod::animated_sphere::AnimatedSphere;
 use crate::my_mod::camera::Camera;
-use crate::my_mod::material::Attenuation;
-use crate::my_mod::material::dielectric::Dielectric;
-use crate::my_mod::material::lambertian::Lambertian;
-use crate::my_mod::material::metal::Metal;
+use crate::my_mod::material::{Attenuation, Material};
 use crate::my_mod::ppm::SavableToPPM;
 use crate::my_mod::renderer::Renderer;
 use crate::my_mod::resolution::Resolution;
@@ -26,7 +22,7 @@ fn get_scene() -> AnimatedHittableList {
         AnimatedSphere::new(
             Vec3::new(0., -1000., 0.),
             1000.,
-            Rc::new(Lambertian::new(Attenuation::new(0.5, 0.5, 0.5))),
+            Material::lambertian(Attenuation::new(0.5, 0.5, 0.5)),
             |_| Vec3::zero()
         ));
 
@@ -46,21 +42,21 @@ fn get_scene() -> AnimatedHittableList {
                     AnimatedSphere::new(
                         center,
                         0.2,
-                        Rc::new(Lambertian::new(Attenuation::random())),
+                        Material::lambertian(Attenuation::random()),
                         |TimePoint(time)| Vec3::new(0., time.sin(), 0.)
                     )
                 } else if choose_mat < 0.95 {
                     AnimatedSphere::new(
                         center,
                         0.2,
-                        Rc::new(Metal::new(Attenuation::random(), random())),
+                        Material::metal(Attenuation::random(), random()),
                         |_| Vec3::zero()
                     )
                 } else {
                     AnimatedSphere::new(
                         center,
                         0.2,
-                        Rc::new(Dielectric::new(1.5)),
+                        Material::dielectric(1.5),
                         |_| Vec3::zero()
                     )
                 };
@@ -73,7 +69,7 @@ fn get_scene() -> AnimatedHittableList {
         AnimatedSphere::new(
             Vec3::new(0., 1., 0.),
             1.0,
-            Rc::new(Dielectric::new(1.5)),
+            Material::dielectric(1.5),
             |_| Vec3::zero()
         )
     ));
@@ -82,7 +78,7 @@ fn get_scene() -> AnimatedHittableList {
         AnimatedSphere::new(
             Vec3::new(-4., 1., 0.),
             1.0,
-            Rc::new(Lambertian::new(Attenuation::new(0.5, 0.2, 0.1))),
+            Material::lambertian(Attenuation::new(0.5, 0.2, 0.1)),
             |_| Vec3::zero()
         )
     ));
@@ -91,7 +87,7 @@ fn get_scene() -> AnimatedHittableList {
         AnimatedSphere::new(
             Vec3::new(4., 1.0, 0.),
             1.0,
-            Rc::new(Metal::new(Attenuation::new(0.7, 0.6, 0.5), 0.)),
+            Material::metal(Attenuation::new(0.7, 0.6, 0.5), 0.),
             |_| Vec3::zero())
     ));
 
