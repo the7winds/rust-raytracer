@@ -3,27 +3,25 @@ use std::error::Error;
 use rand::random;
 
 use crate::my_mod::angle::Angle;
-use crate::my_mod::animated_hittable::{AnimatedHittable, AnimatedHittableList};
-use crate::my_mod::animated_sphere::AnimatedSphere;
 use crate::my_mod::camera::Camera;
 use crate::my_mod::material::{Attenuation, Material};
 use crate::my_mod::ppm::SavableToPPM;
 use crate::my_mod::renderer::Renderer;
 use crate::my_mod::resolution::Resolution;
-use crate::my_mod::time::{TimeInterval, TimePoint};
 use crate::my_mod::vec3::Vec3;
+use crate::my_mod::sphere::Sphere;
+use crate::my_mod::hittable::{Hittable, HittableList};
 
 mod my_mod;
 
-fn get_scene() -> AnimatedHittableList {
-    let mut list: Vec<Box<dyn AnimatedHittable>> = vec![];
+fn get_scene() -> HittableList {
+    let mut list: Vec<Box<dyn Hittable>> = vec![];
 
     let sphere_ground = Box::new(
-        AnimatedSphere::new(
+        Sphere::new(
             Vec3::new(0., -1000., 0.),
             1000.,
             Material::lambertian(Attenuation::new(0.5, 0.5, 0.5)),
-            |_| Vec3::zero()
         ));
 
     list.push(sphere_ground);
@@ -39,25 +37,22 @@ fn get_scene() -> AnimatedHittableList {
 
             if (center - Vec3::new(4., 0.2, 0.)).length() > 0.9 {
                 let sphere = if choose_mat < 0.8 {
-                    AnimatedSphere::new(
+                    Sphere::new(
                         center,
                         0.2,
                         Material::lambertian(Attenuation::random()),
-                        |TimePoint(time)| Vec3::new(0., time.sin(), 0.)
                     )
                 } else if choose_mat < 0.95 {
-                    AnimatedSphere::new(
+                    Sphere::new(
                         center,
                         0.2,
                         Material::metal(Attenuation::random(), random()),
-                        |_| Vec3::zero()
                     )
                 } else {
-                    AnimatedSphere::new(
+                    Sphere::new(
                         center,
                         0.2,
                         Material::dielectric(1.5),
-                        |_| Vec3::zero()
                     )
                 };
                 list.push(Box::new(sphere));
@@ -66,32 +61,30 @@ fn get_scene() -> AnimatedHittableList {
     }
 
     list.push(Box::new(
-        AnimatedSphere::new(
+        Sphere::new(
             Vec3::new(0., 1., 0.),
             1.0,
             Material::dielectric(1.5),
-            |_| Vec3::zero()
         )
     ));
 
     list.push(Box::new(
-        AnimatedSphere::new(
+        Sphere::new(
             Vec3::new(-4., 1., 0.),
             1.0,
             Material::lambertian(Attenuation::new(0.5, 0.2, 0.1)),
-            |_| Vec3::zero()
         )
     ));
 
     list.push(Box::new(
-        AnimatedSphere::new(
+        Sphere::new(
             Vec3::new(4., 1.0, 0.),
             1.0,
-            Material::metal(Attenuation::new(0.7, 0.6, 0.5), 0.),
-            |_| Vec3::zero())
+            Material::metal(Attenuation::new(0.7, 0.6, 0.5), 0.)
+        )
     ));
 
-    AnimatedHittableList { list }
+    HittableList { list }
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -113,7 +106,6 @@ fn main() -> Result<(), Box<dyn Error>> {
         let up = Vec3::new(0., 1., 0.);
         let focus_dist = 10.;
         let aperture = 0.1;
-        let shutter = TimeInterval(0.5);
 
         Camera::new(
             &from,
@@ -123,7 +115,6 @@ fn main() -> Result<(), Box<dyn Error>> {
             aspect_ratio,
             focus_dist,
             aperture,
-            shutter
         )
     };
 

@@ -1,6 +1,5 @@
 use crate::my_mod::angle::Angle;
 use crate::my_mod::ray::Ray;
-use crate::my_mod::time::TimeInterval;
 use crate::my_mod::utils::random_in_unit_disk;
 use crate::my_mod::vec3::Vec3;
 
@@ -13,7 +12,6 @@ pub struct Camera {
     lens_radius: f32,
     x: Vec3,
     y: Vec3,
-    shutter: TimeInterval,
 }
 
 impl Camera {
@@ -25,7 +23,6 @@ impl Camera {
         aspect_ratio: f32,
         focus_dist: f32,
         aperture: f32,
-        shutter: TimeInterval
     ) -> Camera {
         let theta = vfov.radians();
         let h = (theta / 2.).tan();
@@ -52,12 +49,7 @@ impl Camera {
             lens_radius,
             x,
             y,
-            shutter
         }
-    }
-
-    pub fn shutter(&self) -> TimeInterval {
-        self.shutter
     }
 
     pub fn get_ray(&self, u: f32, v: f32) -> Ray {

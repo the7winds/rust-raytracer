@@ -4,10 +4,10 @@ use rand::random;
 
 use crate::my_mod::hittable::HitRecord;
 use crate::my_mod::intensity::Intensity;
+use crate::my_mod::material::Material::{Dielectric, Lambertian, Light, Metal};
 use crate::my_mod::ray::Ray;
-use crate::my_mod::vec3::Vec3;
 use crate::my_mod::utils::random_on_unit_sphere;
-use crate::my_mod::material::Material::{Lambertian, Dielectric, Metal, Light};
+use crate::my_mod::vec3::Vec3;
 
 #[derive(Debug, Copy, Clone)]
 pub struct Attenuation(f32, f32, f32);
@@ -44,7 +44,7 @@ pub enum ScatteringResult {
 }
 
 #[derive(Debug)]
-pub(crate) enum Material {
+pub enum Material {
     Lambertian {
         albedo: Attenuation,
     },

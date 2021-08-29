@@ -1,9 +1,8 @@
 use prgrs::Prgrs;
 use rand::random;
 
-use crate::my_mod::animated_hittable::{AnimatedHittable, AnimatedHittableList};
 use crate::my_mod::camera::Camera;
-use crate::my_mod::hittable::Accuracy;
+use crate::my_mod::hittable::{Accuracy, Hittable, HittableList};
 use crate::my_mod::image::Image;
 use crate::my_mod::intensity::Intensity;
 use crate::my_mod::material::ScatteringResult;
@@ -52,7 +51,7 @@ impl Renderer {
         self
     }
 
-    pub fn render(&self, world: &AnimatedHittableList) -> Image {
+    pub fn render(&self, world: &HittableList) -> Image {
         let mut image = Image::new(self.resolution);
         let Resolution { width, height } = self.resolution;
 
@@ -63,9 +62,8 @@ impl Renderer {
                     let u = ((col as f32) + random::<f32>()) / (width - 1) as f32;
                     let v = ((height - row - 1) as f32 + random::<f32>()) / (height - 1) as f32;
                     let ray = self.camera.get_ray(u, v);
-                    let time = sample_time_point(TimePoint(0.), self.camera.shutter());
                     result_intensity +=
-                        ray_intensity(&world, self.background.as_ref(), time, &ray, &self.accuracy, self.max_depth).into();
+                        ray_intensity(&world, self.background.as_ref(), &ray, &self.accuracy, self.max_depth).into();
                 }
                 result_intensity /= self.samples_per_pixel as f32;
 
@@ -101,9 +99,8 @@ impl Renderer {
 }
 
 fn ray_intensity(
-    hittable_list: &AnimatedHittableList,
+    hittable_list: &HittableList,
     background: impl Fn(&Ray) -> Intensity,
-    time: TimePoint,
     ray: &Ray,
     accuracy: &Accuracy,
     depth: usize,
@@ -112,11 +109,11 @@ fn ray_intensity(
         return Intensity::zero();
     }
 
-    match hittable_list.hit(time, ray, accuracy) {
+    match hittable_list.hit(ray, accuracy) {
         Some(hit_record) => match hit_record.material().scatter(&ray, &hit_record) {
             ScatteringResult::ScatterredRay(attenuation, scattered) => {
                 let color =
-                    ray_intensity(hittable_list, background, time, &scattered, accuracy, depth - 1);
+                    ray_intensity(hittable_list, background, &scattered, accuracy, depth - 1);
                 Intensity::new(
                     attenuation.r() * color.r(),
                     attenuation.g() * color.g(),
