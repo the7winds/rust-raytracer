@@ -1,8 +1,10 @@
-use crate::my_mod::{ray::Ray, vec3::Vec3};
+use glam::Vec3;
+
 use crate::my_mod::bbox::BBox;
 use crate::my_mod::bvh::{Boundable, BoundableAndHittable};
 use crate::my_mod::hittable::{Accuracy, HitRecord, Hittable};
 use crate::my_mod::material::Material;
+use crate::my_mod::ray::Ray;
 
 #[derive(Debug)]
 pub struct Sphere {

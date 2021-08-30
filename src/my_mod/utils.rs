@@ -1,6 +1,7 @@
+use glam::Vec3;
 use rand::random;
 
-use crate::my_mod::{image::Image, rgb::RGB, vec3::Vec3};
+use crate::my_mod::{image::Image, rgb::RGB};
 use crate::my_mod::intensity::Intensity;
 use crate::my_mod::resolution::Resolution;
 

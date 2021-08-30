@@ -1,8 +1,8 @@
+use std::fmt::{Debug, Formatter};
 use std::io;
 
 use crate::my_mod::resolution::Resolution;
 use crate::my_mod::rgb::RGB;
-use std::fmt::{Debug, Formatter, Write};
 
 pub struct Image {
     resolution: Resolution,

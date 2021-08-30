@@ -1,7 +1,8 @@
+use glam::Vec3;
+
 use crate::my_mod::angle::Angle;
 use crate::my_mod::ray::Ray;
 use crate::my_mod::utils::random_in_unit_disk;
-use crate::my_mod::vec3::Vec3;
 
 #[derive(Debug)]
 pub struct Camera {

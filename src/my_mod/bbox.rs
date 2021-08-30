@@ -1,4 +1,4 @@
-use crate::my_mod::vec3::Vec3;
+use glam::Vec3;
 
 #[derive(Copy, Clone, Debug)]
 pub struct BBox {
@@ -15,22 +15,6 @@ impl BBox {
         self.min.x <= z.x && z.x <= self.max.x
             && self.min.y <= z.y && z.y <= self.max.y
             && self.min.z <= z.z && z.z <= self.max.z
-    }
-
-    pub fn centered(&self) -> BBox {
-        let center = self.center();
-        BBox {
-            min: self.min - center,
-            max: self.max - center
-        }
-    }
-
-    pub fn move_to(&self, new_center: &Vec3) -> BBox {
-        let centered = self.centered();
-        BBox {
-            min: centered.min + *new_center,
-            max: centered.max + *new_center
-        }
     }
 
     pub fn merge(a: &BBox, b: &BBox) -> BBox {

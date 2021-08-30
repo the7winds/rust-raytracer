@@ -1,6 +1,7 @@
 use std::error::Error;
-use std::rc::Rc;
+use std::sync::Arc;
 
+use glam::Vec3;
 use rand::random;
 
 use crate::my_mod::angle::Angle;
@@ -12,9 +13,6 @@ use crate::my_mod::ppm::SavableToPPM;
 use crate::my_mod::renderer::Renderer;
 use crate::my_mod::resolution::Resolution;
 use crate::my_mod::sphere::Sphere;
-use crate::my_mod::vec3::Vec3;
-use crate::my_mod::image::Image;
-use std::sync::Arc;
 
 mod my_mod;
 
@@ -127,7 +125,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     Renderer::new(camera, resolution)
         .samples_per_pixel(samples_per_pixel)
         .max_depth(max_depth)
-        .threads_count(2)
+        .threads_count(4)
         .render(&world)
         .save_to_ppm("image.ppm")?;
 

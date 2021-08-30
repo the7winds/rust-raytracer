@@ -1,4 +1,4 @@
-use crate::my_mod::vec3::Vec3;
+use glam::Vec3;
 
 #[derive(Debug)]
 pub struct Ray {

@@ -1,13 +1,13 @@
 use std::cmp::Ordering::{Greater, Less};
 use std::option::Option;
-use std::rc::Rc;
+use std::sync::Arc;
 use std::vec::Vec;
+
+use glam::Vec3;
 
 use crate::my_mod::bvh::BoundableAndHittable;
 use crate::my_mod::material::Material;
 use crate::my_mod::ray::Ray;
-use crate::my_mod::vec3::Vec3;
-use std::sync::Arc;
 
 #[derive(Debug, Clone)]
 pub struct HitRecord<'a> {

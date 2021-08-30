@@ -1,4 +1,7 @@
-use prgrs::Prgrs;
+use std::sync::{Arc, Mutex};
+
+use crossbeam::scope;
+use glam::Vec3;
 use rand::random;
 
 use crate::my_mod::bvh::BVH;
@@ -12,12 +15,7 @@ use crate::my_mod::resolution::Resolution;
 use crate::my_mod::rgb::RGB;
 use crate::my_mod::time::{TimeInterval, TimePoint};
 use crate::my_mod::utils::random_from;
-use crate::my_mod::vec3::Vec3;
-use crossbeam::scope;
-use std::sync::{Mutex, Arc};
-use std::ops::DerefMut;
-use std::cell::RefCell;
-use std::sync::atomic::Ordering::AcqRel;
+use crate::my_mod::vec3;
 
 pub struct Renderer {
     samples_per_pixel: usize,
@@ -26,7 +24,6 @@ pub struct Renderer {
     camera: Camera,
     background: Intensity,
     resolution: Resolution,
-    show_progress: bool,
     threads_count: usize,
 }
 
@@ -39,7 +36,6 @@ impl Renderer {
             camera,
             background: Intensity::new(1., 1., 1.),
             resolution,
-            show_progress: true,
             threads_count: 4
         }
     }
@@ -51,11 +47,6 @@ impl Renderer {
 
     pub fn max_depth(mut self, max_depth: usize) -> Self {
         self.max_depth = max_depth;
-        self
-    }
-
-    pub fn show_progress(mut self, show_progress: bool) -> Self {
-        self.show_progress = show_progress;
         self
     }
 
@@ -78,19 +69,20 @@ impl Renderer {
                         let mut row_pixels = vec![RGB::black(); width];
 
                         for col in 0..width {
-                            let mut result_intensity = Vec3::zero();
+                            let mut result_intensity = vec3::zero();
 
                             for _ in 0..self.samples_per_pixel {
                                 let u = ((col as f32) + random::<f32>()) / (width - 1) as f32;
                                 let v = ((height - row - 1) as f32 + random::<f32>()) / (height - 1) as f32;
                                 let ray = self.camera.get_ray(u, v);
-                                result_intensity += ray_intensity(
+                                let intense: Vec3 = ray_intensity(
                                     bvh.as_ref(),
                                     &self.background,
                                     &ray,
                                     &self.accuracy,
                                     self.max_depth
                                 ).into();
+                                result_intensity += intense;
                             }
                             result_intensity /= self.samples_per_pixel as f32;
 
@@ -120,16 +112,6 @@ impl Renderer {
         });
 
         Arc::try_unwrap(image).expect("Can't unwrap Arc image.").into_inner().unwrap()
-    }
-
-    fn rows_range(&self) -> Box<dyn Iterator<Item = usize>> {
-        let height = self.resolution.height;
-        let range = 0..height;
-        if self.show_progress {
-            Box::new(Prgrs::new(range, height))
-        } else {
-            Box::new(range)
-        }
     }
 }
 

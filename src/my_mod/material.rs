@@ -1,5 +1,6 @@
 use std::fmt::Debug;
 
+use glam::Vec3;
 use rand::random;
 
 use crate::my_mod::hittable::HitRecord;
@@ -7,7 +8,7 @@ use crate::my_mod::intensity::Intensity;
 use crate::my_mod::material::Material::{Dielectric, Lambertian, Light, Metal};
 use crate::my_mod::ray::Ray;
 use crate::my_mod::utils::random_on_unit_sphere;
-use crate::my_mod::vec3::Vec3;
+use crate::my_mod::vec3;
 
 #[derive(Debug, Copy, Clone)]
 pub struct Attenuation(f32, f32, f32);
@@ -104,15 +105,15 @@ impl Material {
                 let scattered = Ray::new(&hit_record.point(), &{
                     let dir = input_ray.direction();
                     let n = hit_record.normal();
-                    match Vec3::refract(dir, n, angle_ratio) {
+                    match vec3::refract(dir, n, angle_ratio) {
                         Some(direction) => direction,
-                        None => Vec3::reflect(dir, n),
+                        None => vec3::reflect(dir, n),
                     }
                 });
                 ScatteringResult::ScatterredRay(attenuation, scattered)
             }
             Material::Metal { albedo, fuzz } => {
-                let reflected = Vec3::reflect(input_ray.direction(), hit_record.normal());
+                let reflected = vec3::reflect(input_ray.direction(), hit_record.normal());
                 let scattered = Ray::new(
                     &hit_record.point(),
                     &(reflected + fuzz * random_on_unit_sphere()),

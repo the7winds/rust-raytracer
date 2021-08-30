@@ -2,15 +2,16 @@ use std::cmp::min_by;
 use std::cmp::Ordering::{Greater, Less};
 use std::fmt::Debug;
 use std::mem::swap;
-use std::rc::Rc;
+use std::sync::Arc;
+
+use glam::Vec3;
 
 use crate::my_mod::bbox::BBox;
 use crate::my_mod::bvh::BVH::{Leaf, Node};
 use crate::my_mod::hittable::{Accuracy, HitRecord, Hittable};
 use crate::my_mod::ray::Ray;
 use crate::my_mod::utils::random_on_unit_sphere;
-use crate::my_mod::vec3::Vec3;
-use std::sync::Arc;
+use crate::my_mod::vec3;
 
 pub trait Boundable {
     fn bbox(&self) -> BBox;
@@ -155,55 +156,5 @@ fn has_intersection(ray: &Ray, bbox: &BBox) -> bool {
 fn get_bbox(objects: &[Arc<dyn BoundableAndHittable>]) -> Option<BBox> {
     Some(objects.iter()
         .map(|h| h.bbox())
-        .fold(BBox { min: Vec3::zero(), max: Vec3::zero() }, |acc, bbox| BBox::merge(&acc, &bbox)))
-}
-
-#[cfg(test)]
-mod test {
-    use crate::my_mod::bbox::BBox;
-    use crate::my_mod::bvh::{get_bbox, has_intersection};
-    use crate::my_mod::ray::Ray;
-    use crate::my_mod::vec3::Vec3;
-    use std::ops::Not;
-
-    #[test]
-    fn test_has_intersection_ray_comes_from_inside() {
-        assert!(
-            has_intersection(
-                &Ray::new(&Vec3::zero(), &Vec3::new(1., 0., 0.)),
-                &BBox { min: Vec3::new(-1., -1., -1.), max: Vec3::new(1., 1., 1.) }
-            )
-        )
-    }
-
-    #[test]
-    fn test_has_intersection_ray_comes_from_outside() {
-        assert!(
-            has_intersection(
-                &Ray::new(&Vec3::zero(), &Vec3::new(1., 0., 0.)),
-                &BBox {
-                    min: Vec3::new(-1., -1., -1.),
-                    max: Vec3::new(1., 1., 1.)
-                }.move_to(&Vec3::new(2., 0., 0.))
-            )
-        )
-    }
-
-    #[test]
-    fn test_has_no_intersection() {
-        assert!(
-            !has_intersection(
-                &Ray::new(&Vec3::zero(), &Vec3::new(-1., 0., 0.)),
-                &BBox {
-                    min: Vec3::new(-1., -1., -1.),
-                    max: Vec3::new(1., 1., 1.)
-                }.move_to(&Vec3::new(2., 0., 0.))
-            )
-        )
-    }
-
-    #[test]
-    fn test_get_bbox_with_no_objects() {
-        matches!(get_bbox(&Vec::new()), None);
-    }
+        .fold(BBox { min: vec3::zero(), max: vec3::zero() }, |acc, bbox| BBox::merge(&acc, &bbox)))
 }
