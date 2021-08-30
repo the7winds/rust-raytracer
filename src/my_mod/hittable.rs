@@ -7,6 +7,7 @@ use crate::my_mod::bvh::BoundableAndHittable;
 use crate::my_mod::material::Material;
 use crate::my_mod::ray::Ray;
 use crate::my_mod::vec3::Vec3;
+use std::sync::Arc;
 
 #[derive(Debug, Clone)]
 pub struct HitRecord<'a> {
@@ -66,7 +67,7 @@ pub trait Hittable {
 
 #[derive(Default)]
 pub struct HittableList {
-    pub list: Vec<Rc<dyn BoundableAndHittable>>,
+    pub list: Vec<Arc<dyn BoundableAndHittable>>,
 }
 
 impl Hittable for HittableList {

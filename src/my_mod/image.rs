@@ -2,6 +2,7 @@ use std::io;
 
 use crate::my_mod::resolution::Resolution;
 use crate::my_mod::rgb::RGB;
+use std::fmt::{Debug, Formatter, Write};
 
 pub struct Image {
     resolution: Resolution,
@@ -65,5 +66,11 @@ impl super::ppm::SavableToPPM for Image {
         }
 
         Ok(())
+    }
+}
+
+impl Debug for Image {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str(format!("Image [ resolution {:?} ]", self.resolution).as_str())
     }
 }

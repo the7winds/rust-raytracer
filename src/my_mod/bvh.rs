@@ -10,12 +10,13 @@ use crate::my_mod::hittable::{Accuracy, HitRecord, Hittable};
 use crate::my_mod::ray::Ray;
 use crate::my_mod::utils::random_on_unit_sphere;
 use crate::my_mod::vec3::Vec3;
+use std::sync::Arc;
 
 pub trait Boundable {
     fn bbox(&self) -> BBox;
 }
 
-pub trait BoundableAndHittable: Boundable + Hittable + Debug {
+pub trait BoundableAndHittable: Boundable + Hittable + Send + Sync + Debug {
 
 }
 
@@ -27,13 +28,13 @@ pub enum BVH {
         bbox: BBox
     },
     Leaf {
-        object: Rc<dyn BoundableAndHittable>,
+        object: Arc<dyn BoundableAndHittable>,
         bbox: BBox
     }
 }
 
 impl BVH {
-    pub fn new(objects: &[Rc<dyn BoundableAndHittable>]) -> BVH {
+    pub fn new(objects: &[Arc<dyn BoundableAndHittable>]) -> BVH {
         if objects.is_empty() {
             panic!("There should be at least one Hittable.")
         }
@@ -59,7 +60,7 @@ impl BVH {
     }
 }
 
-fn split(objects: &[Rc<dyn BoundableAndHittable>]) -> (Vec<Rc<dyn BoundableAndHittable>>, Vec<Rc<dyn BoundableAndHittable>>) {
+fn split(objects: &[Arc<dyn BoundableAndHittable>]) -> (Vec<Arc<dyn BoundableAndHittable>>, Vec<Arc<dyn BoundableAndHittable>>) {
     let len = objects.len();
     if len < 2 {
         panic!("There should be at least 2 objects.");
@@ -151,7 +152,7 @@ fn has_intersection(ray: &Ray, bbox: &BBox) -> bool {
     0. <= *mn && mn <= mx
 }
 
-fn get_bbox(objects: &[Rc<dyn BoundableAndHittable>]) -> Option<BBox> {
+fn get_bbox(objects: &[Arc<dyn BoundableAndHittable>]) -> Option<BBox> {
     Some(objects.iter()
         .map(|h| h.bbox())
         .fold(BBox { min: Vec3::zero(), max: Vec3::zero() }, |acc, bbox| BBox::merge(&acc, &bbox)))
