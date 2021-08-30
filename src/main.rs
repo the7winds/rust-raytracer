@@ -1,23 +1,26 @@
 use std::error::Error;
+use std::rc::Rc;
 
 use rand::random;
 
 use crate::my_mod::angle::Angle;
+use crate::my_mod::bvh::BoundableAndHittable;
 use crate::my_mod::camera::Camera;
+use crate::my_mod::hittable::HittableList;
 use crate::my_mod::material::{Attenuation, Material};
 use crate::my_mod::ppm::SavableToPPM;
 use crate::my_mod::renderer::Renderer;
 use crate::my_mod::resolution::Resolution;
-use crate::my_mod::vec3::Vec3;
 use crate::my_mod::sphere::Sphere;
-use crate::my_mod::hittable::{Hittable, HittableList};
+use crate::my_mod::vec3::Vec3;
+use crate::my_mod::image::Image;
 
 mod my_mod;
 
 fn get_scene() -> HittableList {
-    let mut list: Vec<Box<dyn Hittable>> = vec![];
+    let mut list: Vec<Rc<dyn BoundableAndHittable>> = vec![];
 
-    let sphere_ground = Box::new(
+    let sphere_ground = Rc::new(
         Sphere::new(
             Vec3::new(0., -1000., 0.),
             1000.,
@@ -55,12 +58,12 @@ fn get_scene() -> HittableList {
                         Material::dielectric(1.5),
                     )
                 };
-                list.push(Box::new(sphere));
+                list.push(Rc::new(sphere));
             }
         }
     }
 
-    list.push(Box::new(
+    list.push(Rc::new(
         Sphere::new(
             Vec3::new(0., 1., 0.),
             1.0,
@@ -68,7 +71,7 @@ fn get_scene() -> HittableList {
         )
     ));
 
-    list.push(Box::new(
+    list.push(Rc::new(
         Sphere::new(
             Vec3::new(-4., 1., 0.),
             1.0,
@@ -76,7 +79,7 @@ fn get_scene() -> HittableList {
         )
     ));
 
-    list.push(Box::new(
+    list.push(Rc::new(
         Sphere::new(
             Vec3::new(4., 1.0, 0.),
             1.0,

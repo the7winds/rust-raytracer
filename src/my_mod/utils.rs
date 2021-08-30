@@ -25,7 +25,7 @@ pub fn random_on_unit_sphere() -> Vec3 {
         random_from(-1., 1.),
         random_from(-1., 1.),
         random_from(-1., 1.),
-    )
+    ).normalize()
 }
 
 pub fn random_in_unit_disk() -> (f32, f32) {

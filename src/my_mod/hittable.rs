@@ -1,7 +1,9 @@
 use std::cmp::Ordering::{Greater, Less};
 use std::option::Option;
+use std::rc::Rc;
 use std::vec::Vec;
 
+use crate::my_mod::bvh::BoundableAndHittable;
 use crate::my_mod::material::Material;
 use crate::my_mod::ray::Ray;
 use crate::my_mod::vec3::Vec3;
@@ -64,7 +66,7 @@ pub trait Hittable {
 
 #[derive(Default)]
 pub struct HittableList {
-    pub list: Vec<Box<dyn Hittable>>,
+    pub list: Vec<Rc<dyn BoundableAndHittable>>,
 }
 
 impl Hittable for HittableList {

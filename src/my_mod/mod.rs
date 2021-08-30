@@ -13,3 +13,5 @@ pub mod vec3;
 pub mod time;
 pub mod renderer;
 pub mod resolution;
+pub mod bvh;
+pub mod bbox;

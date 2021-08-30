@@ -1,6 +1,7 @@
 use prgrs::Prgrs;
 use rand::random;
 
+use crate::my_mod::bvh::BVH;
 use crate::my_mod::camera::Camera;
 use crate::my_mod::hittable::{Accuracy, Hittable, HittableList};
 use crate::my_mod::image::Image;
@@ -54,6 +55,7 @@ impl Renderer {
     pub fn render(&self, world: &HittableList) -> Image {
         let mut image = Image::new(self.resolution);
         let Resolution { width, height } = self.resolution;
+        let bvh = BVH::new(&world.list);
 
         for row in self.rows_range() {
             for col in 0..width {
@@ -62,8 +64,13 @@ impl Renderer {
                     let u = ((col as f32) + random::<f32>()) / (width - 1) as f32;
                     let v = ((height - row - 1) as f32 + random::<f32>()) / (height - 1) as f32;
                     let ray = self.camera.get_ray(u, v);
-                    result_intensity +=
-                        ray_intensity(&world, self.background.as_ref(), &ray, &self.accuracy, self.max_depth).into();
+                    result_intensity += ray_intensity(
+                        &bvh,
+                        self.background.as_ref(),
+                        &ray,
+                        &self.accuracy,
+                        self.max_depth
+                    ).into();
                 }
                 result_intensity /= self.samples_per_pixel as f32;
 
@@ -99,7 +106,7 @@ impl Renderer {
 }
 
 fn ray_intensity(
-    hittable_list: &HittableList,
+    hittable_list: &dyn Hittable,
     background: impl Fn(&Ray) -> Intensity,
     ray: &Ray,
     accuracy: &Accuracy,
