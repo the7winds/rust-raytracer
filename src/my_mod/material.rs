@@ -14,11 +14,11 @@ use crate::my_mod::vec3;
 pub struct Attenuation(f32, f32, f32);
 
 impl Attenuation {
-    pub fn new(r: f32, g: f32, b: f32) -> Attenuation {
+    pub fn new(r: f32, g: f32, b: f32) -> Self {
         assert!(0. <= r && r <= 1.);
         assert!(0. <= g && g <= 1.);
         assert!(0. <= b && b <= 1.);
-        Attenuation(r, g, b)
+        Self(r, g, b)
     }
 
     pub fn r(&self) -> f32 {
@@ -33,8 +33,8 @@ impl Attenuation {
         self.2
     }
 
-    pub fn random() -> Attenuation {
-        Attenuation::new(random(), random(), random())
+    pub fn random() -> Self {
+        Self::new(random(), random(), random())
     }
 }
 

@@ -1,18 +1,17 @@
-use std::sync::{Arc, Mutex};
-
-use crossbeam::scope;
 use glam::Vec3;
 use rand::random;
+use rayon::prelude::{IntoParallelIterator, ParallelIterator};
 
-use crate::my_mod::bvh::BVH;
+use crate::my_mod::bvh::BVHScene;
 use crate::my_mod::camera::Camera;
-use crate::my_mod::hittable::{Accuracy, Hittable, HittableList};
+use crate::my_mod::hittable::{Accuracy, Hittable};
 use crate::my_mod::image::Image;
 use crate::my_mod::intensity::Intensity;
 use crate::my_mod::material::ScatteringResult;
 use crate::my_mod::ray::Ray;
 use crate::my_mod::resolution::Resolution;
 use crate::my_mod::rgb::RGB;
+use crate::my_mod::scene::Scene;
 use crate::my_mod::time::{TimeInterval, TimePoint};
 use crate::my_mod::utils::random_from;
 use crate::my_mod::vec3;
@@ -24,7 +23,6 @@ pub struct Renderer {
     camera: Camera,
     background: Intensity,
     resolution: Resolution,
-    threads_count: usize,
 }
 
 impl Renderer {
@@ -36,7 +34,6 @@ impl Renderer {
             camera,
             background: Intensity::new(1., 1., 1.),
             resolution,
-            threads_count: 4
         }
     }
 
@@ -50,68 +47,56 @@ impl Renderer {
         self
     }
 
-    pub fn threads_count(mut self, threads_count: usize) -> Self {
-        self.threads_count = threads_count;
-        self
-    }
-
-    pub fn render(&self, world: &HittableList) -> Image {
-        let image = Arc::new(Mutex::new(Image::new(self.resolution)));
+    pub fn render(&self, scene: &Scene) -> Image {
         let Resolution { width, height } = self.resolution;
-        let bvh = Arc::new(BVH::new(&world.list));
+        let bvh = BVHScene::new(scene);
 
-        scope(|scope| {
-            for thread_id in 0..self.threads_count {
-                let image = image.clone();
-                let bvh = bvh.clone();
-                scope.spawn(move |_| {
-                    for row in (thread_id..height).step_by(self.threads_count) {
-                        let mut row_pixels = vec![RGB::black(); width];
+        let content = (0..height).into_par_iter().map(|row| {
+            let mut row_pixels = vec![RGB::black(); width];
 
-                        for col in 0..width {
-                            let mut result_intensity = vec3::zero();
+            for col in 0..width {
+                let mut result_intensity = vec3::zero();
 
-                            for _ in 0..self.samples_per_pixel {
-                                let u = ((col as f32) + random::<f32>()) / (width - 1) as f32;
-                                let v = ((height - row - 1) as f32 + random::<f32>()) / (height - 1) as f32;
-                                let ray = self.camera.get_ray(u, v);
-                                let intense: Vec3 = ray_intensity(
-                                    bvh.as_ref(),
-                                    &self.background,
-                                    &ray,
-                                    &self.accuracy,
-                                    self.max_depth
-                                ).into();
-                                result_intensity += intense;
-                            }
-                            result_intensity /= self.samples_per_pixel as f32;
+                for _ in 0..self.samples_per_pixel {
+                    let u = ((col as f32) + random::<f32>()) / (width - 1) as f32;
+                    let v = ((height - row - 1) as f32 + random::<f32>()) / (height - 1) as f32;
+                    let ray = self.camera.get_ray(u, v);
+                    let intense: Vec3 = ray_intensity(
+                        &bvh,
+                        &self.background,
+                        &ray,
+                        &self.accuracy,
+                        self.max_depth
+                    ).into();
+                    result_intensity += intense;
+                }
+                result_intensity /= self.samples_per_pixel as f32;
 
-                            // gamma-correction
-                            let result_intensity = Vec3::new(
-                                result_intensity.x.sqrt(),
-                                result_intensity.y.sqrt(),
-                                result_intensity.z.sqrt(),
-                            );
+                // gamma-correction
+                let result_intensity = Vec3::new(
+                    result_intensity.x.sqrt(),
+                    result_intensity.y.sqrt(),
+                    result_intensity.z.sqrt(),
+                );
 
-                            let rgb = RGB::new(
-                                result_intensity.x.clamp(0., 1.),
-                                result_intensity.y.clamp(0., 1.),
-                                result_intensity.z.clamp(0., 1.),
-                            );
+                let rgb = RGB::new(
+                    result_intensity.x.clamp(0., 1.),
+                    result_intensity.y.clamp(0., 1.),
+                    result_intensity.z.clamp(0., 1.),
+                );
 
-                            row_pixels[col] = rgb;
-                        }
-
-                        let mut image = image.lock().unwrap();
-                        for col in 0..width {
-                            image[(row, col)] = row_pixels[col];
-                        }
-                    }
-                });
+                row_pixels[col] = rgb;
             }
-        });
 
-        Arc::try_unwrap(image).expect("Can't unwrap Arc image.").into_inner().unwrap()
+            row_pixels
+        }).flat_map(|x| x).collect();
+
+        Image::new_with_content(
+            Resolution {
+                width,
+                height
+            },
+            content)
     }
 }
 

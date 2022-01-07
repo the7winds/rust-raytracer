@@ -1,32 +1,31 @@
 use std::error::Error;
-use std::sync::Arc;
 
 use glam::Vec3;
 use rand::random;
 
 use crate::my_mod::angle::Angle;
-use crate::my_mod::bvh::BoundableAndHittable;
 use crate::my_mod::camera::Camera;
-use crate::my_mod::hittable::HittableList;
+use crate::my_mod::intensity::Intensity;
 use crate::my_mod::material::{Attenuation, Material};
 use crate::my_mod::ppm::SavableToPPM;
 use crate::my_mod::renderer::Renderer;
 use crate::my_mod::resolution::Resolution;
+use crate::my_mod::scene::{Scene, SceneObject};
 use crate::my_mod::sphere::Sphere;
 
 mod my_mod;
 
-fn get_scene() -> HittableList {
-    let mut list: Vec<Arc<dyn BoundableAndHittable>> = vec![];
+fn get_scene() -> Scene {
+    let mut objects: Vec<Box<dyn SceneObject>> = vec![];
 
-    let sphere_ground = Arc::new(
+    let sphere_ground = Box::new(
         Sphere::new(
             Vec3::new(0., -1000., 0.),
             1000.,
             Material::lambertian(Attenuation::new(0.5, 0.5, 0.5)),
         ));
 
-    list.push(sphere_ground);
+    objects.push(sphere_ground);
 
     for a in -11..11 {
         for b in -11..11 {
@@ -57,12 +56,12 @@ fn get_scene() -> HittableList {
                         Material::dielectric(1.5),
                     )
                 };
-                list.push(Arc::new(sphere));
+                objects.push(Box::new(sphere));
             }
         }
     }
 
-    list.push(Arc::new(
+    objects.push(Box::new(
         Sphere::new(
             Vec3::new(0., 1., 0.),
             1.0,
@@ -70,7 +69,7 @@ fn get_scene() -> HittableList {
         )
     ));
 
-    list.push(Arc::new(
+    objects.push(Box::new(
         Sphere::new(
             Vec3::new(-4., 1., 0.),
             1.0,
@@ -78,24 +77,24 @@ fn get_scene() -> HittableList {
         )
     ));
 
-    list.push(Arc::new(
+    objects.push(Box::new(
         Sphere::new(
             Vec3::new(4., 1.0, 0.),
             1.0,
-            Material::metal(Attenuation::new(0.7, 0.6, 0.5), 0.)
+            Material::light(Intensity::new(10., 0., 0.))
         )
     ));
 
-    HittableList { list }
+    Scene(objects)
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let samples_per_pixel = 100;
+    let samples_per_pixel = 500;
     let max_depth = 50;
 
     let aspect_ratio = 3. / 2. as f32;
     let resolution = {
-        let width = 500;
+        let width = 720;
         let height = (width as f32 / aspect_ratio) as usize;
         Resolution { width, height }
     };
@@ -125,7 +124,6 @@ fn main() -> Result<(), Box<dyn Error>> {
     Renderer::new(camera, resolution)
         .samples_per_pixel(samples_per_pixel)
         .max_depth(max_depth)
-        .threads_count(4)
         .render(&world)
         .save_to_ppm("image.ppm")?;
 

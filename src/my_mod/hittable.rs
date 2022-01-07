@@ -1,11 +1,7 @@
-use std::cmp::Ordering::{Greater, Less};
 use std::option::Option;
-use std::sync::Arc;
-use std::vec::Vec;
 
 use glam::Vec3;
 
-use crate::my_mod::bvh::BoundableAndHittable;
 use crate::my_mod::material::Material;
 use crate::my_mod::ray::Ray;
 
@@ -25,8 +21,8 @@ impl<'a> HitRecord<'a> {
         material: &'a Material,
         t: f32,
         front: bool,
-    ) -> HitRecord {
-        HitRecord {
+    ) -> Self {
+        Self {
             point,
             normal,
             material,
@@ -63,18 +59,4 @@ pub struct Accuracy {
 
 pub trait Hittable {
     fn hit(&self, ray: &Ray, range: &Accuracy) -> Option<HitRecord>;
-}
-
-#[derive(Default)]
-pub struct HittableList {
-    pub list: Vec<Arc<dyn BoundableAndHittable>>,
-}
-
-impl Hittable for HittableList {
-    fn hit(&self, ray: &Ray, accuracy: &Accuracy) -> Option<HitRecord> {
-        self.list
-            .iter()
-            .flat_map(|hittable| hittable.hit(ray, accuracy))
-            .min_by(|a, b| if a.t < b.t { Less } else { Greater })
-    }
 }

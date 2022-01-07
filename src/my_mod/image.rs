@@ -12,9 +12,18 @@ pub struct Image {
 impl Image {
     pub fn new(resolution: Resolution) -> Self {
         let pixels_count = resolution.width * resolution.height;
-        Image {
+        Self {
             resolution,
             content: vec![RGB::black(); pixels_count],
+        }
+    }
+
+    pub fn new_with_content(resolution: Resolution, content: Vec<RGB>) -> Self {
+        let pixels_count = resolution.width * resolution.height;
+        assert_eq!(pixels_count, content.len());
+        Self {
+            resolution,
+            content
         }
     }
 

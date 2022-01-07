@@ -1,10 +1,11 @@
 use glam::Vec3;
 
 use crate::my_mod::bbox::BBox;
-use crate::my_mod::bvh::{Boundable, BoundableAndHittable};
+use crate::my_mod::bvh::Boundable;
 use crate::my_mod::hittable::{Accuracy, HitRecord, Hittable};
 use crate::my_mod::material::Material;
 use crate::my_mod::ray::Ray;
+use crate::my_mod::scene::SceneObject;
 
 #[derive(Debug)]
 pub struct Sphere {
@@ -85,5 +86,5 @@ impl Boundable for Sphere {
     }
 }
 
-impl BoundableAndHittable for Sphere {
+impl SceneObject for Sphere {
 }
